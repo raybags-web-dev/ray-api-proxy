@@ -3,14 +3,13 @@
 - For now, only get requests are supported
 - make calls to any client that accespts a get request
 
-[ ] Query parameters:
+- Query parameters:
 ```json
 base_url,
 parameters
 ```
 
-
-[ ] Format:
+- Format:
 
 ```json
    {
