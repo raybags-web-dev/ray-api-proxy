@@ -23,7 +23,7 @@
 
             (async() => {
                 try {
-                    const url = `/ray-proxy/v1?q=${location_param || 'amsterdam'}`
+                    const url = `/v1?q=${location_param || 'amsterdam'}`
 
                     const res = await fetch(url);
                     const data = await res.json();
