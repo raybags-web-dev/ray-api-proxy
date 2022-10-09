@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ray-api-proxy</title>
+</head>
+
+<body>
+    <p style="font-size: 15px; font-weight: bold;" id="my_data">Loading...</p>
+
+</body>
+
+<script>
+    const container = document.getElementById('my_data');
+
+    window.addEventListener('load', async(event) => {
+        try {
+            const params = new URLSearchParams(window.location.search)
+            let location_param = params.get('q');
+
+            (async() => {
+                try {
+                    const url = `/ray-proxy/v1?q=${location_param || 'amsterdam'}`
+
+                    const res = await fetch(url);
+                    const data = await res.json();
+
+                    if (data.cod === '404') return alert('provide location query!');
+                    container.textContent = JSON.stringify(data);
+
+                } catch (e) {
+                    console.log(e.message)
+                    container.textContent = JSON.stringify({
+                        error: 'e.message'
+                    });
+
+                }
+            })()
+
+        } catch (e) {
+            console.log(e.message)
+            container.textContent = JSON.stringify({
+                error: 'e.message'
+            });
+        }
+    });
+</script>
+
+</html>

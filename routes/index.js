@@ -10,7 +10,7 @@ const { BASE_URL, API_KEY_NAME, API_KEY_VALUE } = process.env
 
 let cache = apicache.middleware
 
-router.get('/', cache('2 minutes'), async(req, res) => {
+router.get('/ray-proxy/v1', cache('2 minutes'), async(req, res) => {
     try {
         // search params
         const params = new URLSearchParams({

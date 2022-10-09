@@ -3,16 +3,20 @@ const cors = require('cors');
 const app = express();
 const rateLimit = require('express-rate-limit');
 
+
+
+app.use(express.static("public"));
+
 // limiter
 const limiter = rateLimit({
-    windowMs: 10 * 60 * 1000,
-    max: 5
+    windowMs: 10 * 90 * 1000,
+    max: 10
 })
 
 app.use(limiter)
 app.set('trust proxy', 1);
 
-app.use('/proxy-ray-api', require('./routes/index'));
+app.use('/', require('./routes/index'));
 
 
 app.use(cors());
