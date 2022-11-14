@@ -6,47 +6,174 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ray-api-proxy</title>
+
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            overflow: hidden;
+            display: grid;
+            place-items: center;
+            background: rgba(255, 255, 255, 0.3);
+            color: black;
+            padding: 2rem;
+        }
+        
+        #content_container {
+            display: flex;
+            justify-content: flex-start;
+            align-items: baseline;
+            flex-direction: column;
+            min-width: 90vw;
+            border-radius: .5rem;
+            height: 90vh;
+            padding: 1rem;
+            overflow: hidden;
+            overflow-y: auto;
+            box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+        }
+        
+        .hide {
+            display: none;
+        }
+        
+        ._ele {
+            padding: .5rem;
+            max-width: 97%;
+            min-width: 97%;
+            -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+            box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
+            border-radius: .4rem;
+        }
+        
+        .loader {
+            transform: rotateZ(45deg);
+            perspective: 1000px;
+            border-radius: 50%;
+            width: 55px;
+            height: 55px;
+            color: rgb(0, 0, 0);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .loader:before,
+        .loader:after {
+            content: '';
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: inherit;
+            height: inherit;
+            border-radius: 50%;
+            transform: rotateX(70deg);
+            animation: 1s spin linear infinite;
+        }
+        
+        .loader:after {
+            color: #FF3D00;
+            transform: rotateY(70deg);
+            animation-delay: .4s;
+        }
+        
+        @keyframes rotate {
+            0% {
+                transform: translate(-50%, -50%) rotateZ(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotateZ(360deg);
+            }
+        }
+        
+        @keyframes rotateccw {
+            0% {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            100% {
+                transform: translate(-50%, -50%) rotate(-360deg);
+            }
+        }
+        
+        @keyframes spin {
+            0%,
+            100% {
+                box-shadow: .2em 0px 0 0px currentcolor;
+            }
+            12% {
+                box-shadow: .2em .2em 0 0 currentcolor;
+            }
+            25% {
+                box-shadow: 0 .2em 0 0px currentcolor;
+            }
+            37% {
+                box-shadow: -.2em .2em 0 0 currentcolor;
+            }
+            50% {
+                box-shadow: -.2em 0 0 0 currentcolor;
+            }
+            62% {
+                box-shadow: -.2em -.2em 0 0 currentcolor;
+            }
+            75% {
+                box-shadow: 0px -.2em 0 0 currentcolor;
+            }
+            87% {
+                box-shadow: .2em -.2em 0 0 currentcolor;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <p style="font-size: 15px; font-weight: bold;" id="my_data">Loading...</p>
-
+    <div id="content_container">
+        <span class="loader"></span>
+    </div>
 </body>
 
 <script>
-    const container = document.getElementById('my_data');
-
+    const CONTENT_CONTAINER = document.getElementById('content_container'),
+        main_cities = ['tokyo', 'paris', 'chicago', 'shangai', 'dhaka',
+            'istanbul', 'manila', 'lagos', 'kampala', 'moscow', 'jakarta', 'toronto',
+            'johannesburg', 'london', 'munich'
+        ]
     window.addEventListener('load', async(event) => {
-        try {
-            const params = new URLSearchParams(window.location.search)
-            let location_param = params.get('q');
+        for (city of main_cities) {
+            try {
+                const url = `/v1?q=${city}`
 
-            (async() => {
-                try {
-                    const url = `/v1?q=${location_param || 'amsterdam'}`
+                const res = await fetch(url),
+                    data = await res.json();
+                //let data = 'ksdjla'
 
-                    const res = await fetch(url);
-                    const data = await res.json();
+                if (data.cod === '404') continue;
+                let ele_data = await JSON.stringify(data),
+                    my_data = await create_paragraph(ele_data);
 
-                    if (data.cod === '404') return alert('provide location query!');
-                    container.textContent = JSON.stringify(data);
+                CONTENT_CONTAINER.append(my_data);
+                document.querySelector('.loader').classList.add('hide');
 
-                } catch (e) {
-                    console.log(e.message)
-                    container.textContent = JSON.stringify({
-                        error: 'e.message'
-                    });
-
-                }
-            })()
-
-        } catch (e) {
-            console.log(e.message)
-            container.textContent = JSON.stringify({
-                error: 'e.message'
-            });
+            } catch (e) {
+                let err = create_paragraph(JSON.stringify(e.message));
+                CONTENT_CONTAINER.append(err);
+            }
         }
     });
+
+    function create_paragraph(text) {
+        let element = document.createElement("p");
+        element.classList = '_ele';
+        element.style.cssText = 'font-size:15px; font-weight:bold;'
+        element.innerText = `${text || 'Loading...'}`
+        return element
+    }
 </script>
 
 </html>
