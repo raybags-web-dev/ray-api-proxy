@@ -18,24 +18,33 @@
         body {
             overflow: hidden;
             display: grid;
+            place-content: center;
             place-items: center;
             background: rgba(255, 255, 255, 0.3);
             color: black;
             padding: 2rem;
         }
         
-        #content_container {
+        .content_container {
             display: flex;
-            justify-content: flex-start;
-            align-items: baseline;
-            flex-direction: column;
-            min-width: 90vw;
+            place-self: center;
+            align-items: center;
+            flex-wrap: wrap;
+            width: 90vw;
             border-radius: .5rem;
-            height: 90vh;
-            padding: 1rem;
+            height: 85vh;
+            padding: 2rem;
             overflow: hidden;
             overflow-y: auto;
-            box-shadow: rgba(17, 12, 46, 0.15) 0px 48px 100px 0px;
+            margin-top: 1rem;
+            box-shadow: rgba(17, 12, 46, 0.12) 0px 48px 100px 0px;
+        }
+        
+        .heading__main {
+            position: fixed;
+            top: -1%;
+            left: 50%;
+            transform: translate(-50%, -1%);
         }
         
         .hide {
@@ -43,12 +52,23 @@
         }
         
         ._ele {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: flex-start;
+            min-height: max-content !important;
+            flex-wrap: wrap;
             padding: .5rem;
-            max-width: 97%;
-            min-width: 97%;
+            width: 97%;
+            overflow-y: auto;
             -webkit-box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
             box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 50px;
             border-radius: .4rem;
+        }
+        
+        ._ele:hover {
+            transition: .3s;
+            background: rgb(128, 128, 128, .1);
         }
         
         .loader {
@@ -133,38 +153,73 @@
 </head>
 
 <body>
-    <div id="content_container">
-        <span class="loader"></span>
-    </div>
+    <span class="loader"></span>
+    <h2 class="heading__main">Weather Data</h2>
+    <div class="content_container"></div>
 </body>
 
 <script>
-    const CONTENT_CONTAINER = document.getElementById('content_container'),
+    let breakingnewsULR = 'https://raybags.herokuapp.com/scrapper/v1/sky-breaking-news',
+        travelnews = 'https://raybags.herokuapp.com/scrapper/v1/sky-travel-news'
+
+    const CONTENT_CONTAINER = document.querySelector('.content_container'),
+        loader = document.querySelector('.loader'),
         main_cities = ['tokyo', 'paris', 'chicago', 'shangai', 'dhaka',
             'istanbul', 'manila', 'lagos', 'kampala', 'moscow', 'jakarta', 'toronto',
             'johannesburg', 'london', 'munich'
         ]
     window.addEventListener('load', async(event) => {
-        for (city of main_cities) {
-            try {
+        try {
+            // weather around the world
+            /*for (city of main_cities) {
                 const url = `/v1?q=${city}`
-
                 const res = await fetch(url),
                     data = await res.json();
-                //let data = 'ksdjla'
 
                 if (data.cod === '404') continue;
                 let ele_data = await JSON.stringify(data),
                     my_data = await create_paragraph(ele_data);
 
                 CONTENT_CONTAINER.append(my_data);
-                document.querySelector('.loader').classList.add('hide');
+                loader.classList.add('hide');
+            }*/
 
-            } catch (e) {
-                let err = create_paragraph(JSON.stringify(e.message));
-                CONTENT_CONTAINER.append(err);
+            // news historical data
+
+            let response = await fetch(breakingnewsULR);
+            if (response.status === 200) {
+                document.querySelector('.heading__main').textContent = 'Sky News data'
+                let data = await response.json();
+                loader.classList.add('hide');
+
+                const {
+                    newsBreaking1,
+                    newsBreaking2
+                } = await data;
+                const [...breakin1] = await newsBreaking1;
+                const [...breakin2] = await newsBreaking2;
+
+
+                for (object of breakin1) {
+                    let my_data = await create_paragraph(JSON.stringify(object));
+
+                    CONTENT_CONTAINER.append(my_data);
+                    loader.classList.add('hide');
+                }
+
+                for (object of breakin2) {
+                    let my_data = await create_paragraph(JSON.stringify(object));
+
+                    CONTENT_CONTAINER.append(my_data);
+                    loader.classList.add('hide');
+                }
             }
+        } catch (e) {
+            console.log(e.message)
+            let err = create_paragraph(JSON.stringify(e));
+            CONTENT_CONTAINER.append(err);
         }
+
     });
 
     function create_paragraph(text) {
